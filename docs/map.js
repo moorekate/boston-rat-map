@@ -3,14 +3,8 @@ import * as maplibregl from "https://unpkg.com/maplibre-gl@6.6.0/dist/maplibre-g
 const RAT_DATA_URL =
   "https://kam-bos-311-rats.s3.us-east-2.amazonaws.com/serving/rats.geojson";
 
-
-// -----------------------------------------
-// BOSTON SEARCH BOUNDS
-// -----------------------------------------
-
 const BOSTON_VIEWBOX =
   "-71.1912,42.3969,-70.9860,42.2279";
-
 
 let searchMarker = null;
 
@@ -21,18 +15,10 @@ let searchMarker = null;
 
 const map = new maplibregl.Map({
   container: "map",
-
-  style:
-    "https://tiles.openfreemap.org/styles/liberty",
-
-  center: [
-    -71.0589,
-    42.3601
-  ],
-
+  style: "https://tiles.openfreemap.org/styles/liberty",
+  center: [-71.0589, 42.3601],
   zoom: 11
 });
-
 
 map.addControl(
   new maplibregl.NavigationControl(),
@@ -48,13 +34,9 @@ map.on("load", () => {
 
   map.addSource("rats", {
     type: "geojson",
-
     data: RAT_DATA_URL,
-
     cluster: true,
-
     clusterMaxZoom: 14,
-
     clusterRadius: 50
   });
 
@@ -65,9 +47,7 @@ map.on("load", () => {
 
   map.addLayer({
     id: "rat-clusters",
-
     type: "circle",
-
     source: "rats",
 
     filter: [
@@ -76,45 +56,31 @@ map.on("load", () => {
     ],
 
     paint: {
-
       "circle-radius": [
         "step",
-
         ["get", "point_count"],
 
         16,
-
         25, 20,
-
         100, 26,
-
         500, 34
       ],
 
-      "circle-color":
-        "#ffffff",
-
-      "circle-opacity":
-        0.9,
-
-      "circle-stroke-color":
-        "#000000",
-
-      "circle-stroke-width":
-        2
+      "circle-color": "#ffffff",
+      "circle-opacity": 0.9,
+      "circle-stroke-color": "#000000",
+      "circle-stroke-width": 2
     }
   });
 
 
   // ---------------------------------------
-  // NUMBER INSIDE EACH CLUSTER
+  // CLUSTER COUNT
   // ---------------------------------------
 
   map.addLayer({
     id: "rat-cluster-count",
-
     type: "symbol",
-
     source: "rats",
 
     filter: [
@@ -123,35 +89,28 @@ map.on("load", () => {
     ],
 
     layout: {
-
       "text-field": [
         "get",
         "point_count_abbreviated"
       ],
 
       "text-size": 12,
-
-      "text-allow-overlap":
-        true
+      "text-allow-overlap": true
     },
 
     paint: {
-
-      "text-color":
-        "#000000"
+      "text-color": "#000000"
     }
   });
 
 
   // ---------------------------------------
-  // INDIVIDUAL RAT REPORTS
+  // INDIVIDUAL RAT POINTS
   // ---------------------------------------
 
   map.addLayer({
     id: "rat-points",
-
     type: "circle",
-
     source: "rats",
 
     filter: [
@@ -160,35 +119,25 @@ map.on("load", () => {
     ],
 
     paint: {
-
       "circle-radius": [
         "interpolate",
-
         ["linear"],
-
         ["zoom"],
 
         11, 3,
-
         14, 5,
-
         17, 8
       ],
 
-      "circle-color":
-        "#ffffff",
-
-      "circle-stroke-color":
-        "#000000",
-
-      "circle-stroke-width":
-        1
+      "circle-color": "#ffffff",
+      "circle-stroke-color": "#000000",
+      "circle-stroke-width": 1
     }
   });
 
 
   // ---------------------------------------
-  // CLICK CLUSTER TO ZOOM
+  // CLICK CLUSTER -> ZOOM
   // ---------------------------------------
 
   map.on(
@@ -200,9 +149,7 @@ map.on("load", () => {
         map.queryRenderedFeatures(
           event.point,
           {
-            layers: [
-              "rat-clusters"
-            ]
+            layers: ["rat-clusters"]
           }
         );
 
@@ -215,14 +162,11 @@ map.on("load", () => {
       const cluster =
         features[0];
 
-
       const clusterId =
         cluster.properties.cluster_id;
 
-
       const source =
         map.getSource("rats");
-
 
       const zoom =
         await source.getClusterExpansionZoom(
@@ -236,7 +180,6 @@ map.on("load", () => {
 
         zoom: zoom
       });
-
     }
   );
 
@@ -254,9 +197,7 @@ map.on("load", () => {
         map.queryRenderedFeatures(
           event.point,
           {
-            layers: [
-              "rat-points"
-            ]
+            layers: ["rat-points"]
           }
         );
 
@@ -272,12 +213,92 @@ map.on("load", () => {
           .coordinates;
 
 
-      const reports =
-        clickedFeatures.map(
-          feature =>
-            feature.properties
-        );
+      // -----------------------------------
+      // GET REPORTS + SORT NEWEST -> OLDEST
+      // -----------------------------------
 
+      const reports =
+        clickedFeatures
+          .map(
+            feature =>
+              feature.properties
+          )
+          .sort(
+            (a, b) => {
+
+              const dateA =
+                a.open_dt
+                  ? new Date(
+                      a.open_dt
+                    ).getTime()
+                  : 0;
+
+
+              const dateB =
+                b.open_dt
+                  ? new Date(
+                      b.open_dt
+                    ).getTime()
+                  : 0;
+
+
+              return dateA - dateB;
+            }
+          );
+
+
+      // -----------------------------------
+      // DETERMINE AVAILABLE SCREEN SPACE
+      // -----------------------------------
+
+      const mapHeight =
+        map.getContainer().clientHeight;
+
+      const clickY =
+        event.point.y;
+
+      const spaceAbove =
+        clickY;
+
+      const spaceBelow =
+        mapHeight - clickY;
+
+      const padding =
+        30;
+
+
+      let popupAnchor;
+      let availableHeight;
+
+
+      if (spaceAbove >= spaceBelow) {
+
+        popupAnchor =
+          "bottom";
+
+        availableHeight =
+          Math.max(
+            180,
+            spaceAbove - padding
+          );
+
+      } else {
+
+        popupAnchor =
+          "top";
+
+        availableHeight =
+          Math.max(
+            180,
+            spaceBelow - padding
+          );
+
+      }
+
+
+      // -----------------------------------
+      // BUILD REPORT HTML
+      // -----------------------------------
 
       const reportsHtml =
         reports
@@ -285,7 +306,7 @@ map.on("load", () => {
             (props, index) => {
 
               return `
-                <div style="margin-bottom: 10px;">
+                <div class="rat-report">
 
                   <strong>
                     Rodent Activity
@@ -338,38 +359,82 @@ map.on("load", () => {
 
                 </div>
               `;
-
             }
           )
           .join("<hr>");
 
 
-      new maplibregl.Popup({
-        maxWidth:
-          "350px"
-      })
+      // -----------------------------------
+      // CREATE POPUP
+      // -----------------------------------
 
-        .setLngLat(
-          coordinates
-        )
+      const popup =
+        new maplibregl.Popup({
+          maxWidth: "360px",
+          anchor: popupAnchor
+        })
 
-        .setHTML(`
-          <strong>
-            ${reports.length}
-            report${
-              reports.length === 1
-                ? ""
-                : "s"
-            }
-            at this location
-          </strong>
+          .setLngLat(
+            coordinates
+          )
 
-          <hr>
+          .setHTML(`
+            <div class="rat-popup">
 
-          ${reportsHtml}
-        `)
+              <div class="rat-popup-header">
+                ${reports.length}
+                report${
+                  reports.length === 1
+                    ? ""
+                    : "s"
+                }
+                at this location
+              </div>
 
-        .addTo(map);
+              <div class="rat-popup-reports">
+                ${reportsHtml}
+              </div>
+
+            </div>
+          `)
+
+          .addTo(map);
+
+
+      // -----------------------------------
+      // APPLY RESPONSIVE HEIGHT
+      // -----------------------------------
+
+      requestAnimationFrame(
+        () => {
+
+          const popupElement =
+            popup.getElement();
+
+          if (!popupElement) {
+            return;
+          }
+
+
+          const popupContent =
+            popupElement.querySelector(
+              ".maplibregl-popup-content"
+            );
+
+
+          if (!popupContent) {
+            return;
+          }
+
+
+          popupContent.style.maxHeight =
+            `${availableHeight}px`;
+
+          popupContent.style.overflowY =
+            "auto";
+
+        }
+      );
 
     }
   );
@@ -387,7 +452,6 @@ map.on("load", () => {
       map.getCanvas()
         .style
         .cursor = "pointer";
-
     }
   );
 
@@ -400,7 +464,6 @@ map.on("load", () => {
       map.getCanvas()
         .style
         .cursor = "";
-
     }
   );
 
@@ -413,7 +476,6 @@ map.on("load", () => {
       map.getCanvas()
         .style
         .cursor = "pointer";
-
     }
   );
 
@@ -426,7 +488,6 @@ map.on("load", () => {
       map.getCanvas()
         .style
         .cursor = "";
-
     }
   );
 
@@ -528,7 +589,6 @@ searchForm.addEventListener(
         throw new Error(
           `Geocoder returned ${response.status}`
         );
-
       }
 
 
@@ -542,7 +602,6 @@ searchForm.addEventListener(
           "No Boston address found.";
 
         return;
-
       }
 
 
@@ -558,15 +617,11 @@ searchForm.addEventListener(
         Number(result.lon);
 
 
-      // Remove previous marker
       if (searchMarker) {
-
         searchMarker.remove();
-
       }
 
 
-      // Add marker at searched address
       searchMarker =
         new maplibregl.Marker()
 
@@ -578,9 +633,7 @@ searchForm.addEventListener(
           .addTo(map);
 
 
-      // Zoom to searched address
       map.flyTo({
-
         center: [
           longitude,
           latitude
@@ -589,7 +642,6 @@ searchForm.addEventListener(
         zoom: 17,
 
         essential: true
-
       });
 
 
@@ -603,7 +655,6 @@ searchForm.addEventListener(
 
       searchMessage.textContent =
         "Address search failed.";
-
     }
 
   }

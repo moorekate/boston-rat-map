@@ -1,23 +1,39 @@
+/* -----------------------------------------
+   PAGE
+----------------------------------------- */
+
 html,
 body {
   margin: 0;
   padding: 0;
+
+  width: 100%;
   height: 100%;
+
   font-family: Arial, sans-serif;
 }
+
 
 #map {
   width: 100%;
   height: 100%;
 }
 
+
+/* -----------------------------------------
+   ADDRESS SEARCH
+----------------------------------------- */
+
 .search-panel {
   position: absolute;
+
   top: 16px;
   left: 16px;
+
   z-index: 10;
 
   width: 340px;
+
   padding: 12px;
 
   background: white;
@@ -25,16 +41,23 @@ body {
   border: 1px solid black;
   border-radius: 8px;
 
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 2px 8px
+    rgba(0, 0, 0, 0.15);
 }
+
 
 #address-search-form {
   display: flex;
+
   gap: 8px;
 }
 
+
 #address-search {
   flex: 1;
+
+  min-width: 0;
 
   padding: 8px;
 
@@ -43,6 +66,7 @@ body {
 
   font-size: 14px;
 }
+
 
 button {
   padding: 8px 12px;
@@ -56,13 +80,128 @@ button {
   cursor: pointer;
 }
 
+
 button:hover {
   opacity: 0.85;
 }
+
 
 #search-message {
   margin-top: 8px;
 
   font-size: 13px;
   line-height: 1.3;
+}
+
+
+/* -----------------------------------------
+   MAPLIBRE POPUP
+----------------------------------------- */
+
+.maplibregl-popup {
+  max-width: 360px !important;
+}
+
+
+.maplibregl-popup-content {
+  box-sizing: border-box;
+
+  overflow-x: hidden;
+
+  padding: 18px 20px;
+
+  border-radius: 8px;
+}
+
+
+/* -----------------------------------------
+   RAT POPUP
+----------------------------------------- */
+
+.rat-popup {
+  width: 320px;
+
+  max-width:
+    calc(100vw - 80px);
+}
+
+
+.rat-popup-header {
+  font-size: 18px;
+  font-weight: 700;
+
+  margin-bottom: 12px;
+
+  padding-bottom: 12px;
+  padding-right: 18px;
+
+  border-bottom:
+    1px solid #aaaaaa;
+}
+
+
+.rat-popup-reports {
+  overflow: visible;
+}
+
+
+/* -----------------------------------------
+   INDIVIDUAL REPORT
+----------------------------------------- */
+
+.rat-report {
+  line-height: 1.5;
+
+  margin-bottom: 10px;
+
+  overflow-wrap: anywhere;
+}
+
+
+.rat-report strong {
+  font-size: 15px;
+}
+
+
+.rat-popup-reports hr {
+  margin: 14px 0;
+
+  border: 0;
+
+  border-top:
+    1px solid #cccccc;
+}
+
+
+/* -----------------------------------------
+   MOBILE
+----------------------------------------- */
+
+@media (max-width: 600px) {
+
+  .search-panel {
+    left: 10px;
+    right: 10px;
+
+    width: auto;
+
+    box-sizing:
+      border-box;
+  }
+
+
+  .rat-popup {
+    width: 280px;
+
+    max-width:
+      calc(100vw - 60px);
+  }
+
+
+  .maplibregl-popup {
+    max-width:
+      calc(100vw - 20px)
+      !important;
+  }
+
 }
