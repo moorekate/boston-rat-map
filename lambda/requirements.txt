@@ -1,0 +1,10 @@
+# something this simple doesn't really require a Docker container
+# so instead of using a Dockerfile, we can just use a requirements.txt file to install dependencies
+# requirements.txt is basically a list of the Python packages your project needs in order to run
+
+requests
+boto3
+
+# can also pin versions if wanted, for example:
+# requests==2.32.5
+# boto3==1.43.67

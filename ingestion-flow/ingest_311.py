@@ -93,3 +93,5 @@ for resource in resources:
     print("ID:", resource.get("id")) # id of the resource (i.e. the unique identifier for the resource in CKAN)
     print("URL:", resource.get("url")) # url of the resource (i.e. where the file is located) on the CKAN instance
     print()
+
+    # adding comment to force refresh
